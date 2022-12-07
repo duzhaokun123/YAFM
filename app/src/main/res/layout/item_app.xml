@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/mcv"
+        style="@style/Widget.Material3.CardView.Elevated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="0dp">
+
+        <RelativeLayout
+            android:id="@+id/rl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp">
+
+            <ImageView
+                android:id="@+id/iv_icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                tools:ignore="ContentDescription" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tv_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/iv_icon"
+                android:textAppearance="?textAppearanceTitleMedium" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tv_package"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_label"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/iv_icon"
+                android:textAppearance="?textAppearanceBodyMedium" />
+
+            <Spinner
+                android:id="@+id/sp_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/iv_icon"
+                android:layout_marginStart="2dp"
+                android:layout_marginTop="12dp"
+                android:layout_toEndOf="@id/sp_config"
+                android:background="@null"
+                android:entries="@array/level_entries"
+                android:spinnerMode="dropdown" />
+
+            <Spinner
+                android:id="@+id/sp_config"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/iv_icon"
+                android:layout_marginTop="12dp"
+                android:background="@null"
+                android:entries="@array/config_entries"
+                android:spinnerMode="dropdown" />
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+</layout>

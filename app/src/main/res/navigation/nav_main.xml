@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_main.xml"
+    app:startDestination="@id/navigation_home">
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="io.github.duzhaokun123.yafm.ui.main.HomeFragment"
+        android:label="@string/title_home" />
+
+    <fragment
+        android:id="@+id/navigation_config"
+        android:name="io.github.duzhaokun123.yafm.ui.main.ConfigFragment"
+        android:label="@string/title_config" />
+
+    <fragment
+        android:id="@+id/navigation_log"
+        android:name="io.github.duzhaokun123.yafm.ui.main.LogFragment"
+        android:label="@string/title_log" />
+
+</navigation>

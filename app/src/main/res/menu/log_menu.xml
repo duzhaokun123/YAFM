@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/update_label"
+        app:showAsAction="always"
+        android:title="@string/update_app_name"
+        android:icon="@drawable/ic_update_app_name"/>
+    <item
+        android:id="@+id/printf_freeze"
+        android:title="@string/check_freezer"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_check_freezer"/>
+    <item
+        android:id="@+id/clear_log"
+        android:title="@string/clear_log_text"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_clear_log"/>
+    <item
+        android:id="@+id/help_log"
+        android:title="@string/help"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_help"/>
+</menu>

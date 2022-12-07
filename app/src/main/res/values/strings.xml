@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">YAFM</string>
+    <string name="details">details</string>
+    <string name="unknown_error">unknown error</string>
+    <string name="title_home">home</string>
+    <string name="title_config">config</string>
+    <string name="title_log">log</string>
+    <string name="update_app_name">update app name</string>
+    <string name="help">help</string>
+    <string name="clear_log_text">clear log</string>
+    <string name="check_freezer">check freezer</string>
+    <string name="update_start">Updating AppLabel</string>
+    <string name="freezeit_offline">Freezeit is not installed or running</string>
+    <string name="update_success">Update success</string>
+    <string name="update_fail">Update fail</string>
+    <string name="title_activity_setting">settings</string>
+    <string name="about">about</string>
+    <string name="magisk_online">Magisk activated</string>
+    <string name="install">install</string>
+    <string name="need_update">need update to %s</string>
+    <string name="loading">loading…</string>
+    <string name="realtime_text">CPU:%2d%%  %.1f℃</string>
+    <string name="system_info">system info</string>
+    <string name="bind_core_title">BindCluster</string>
+    <string name="slowly_tips">Don\'t operate too quickly</string>
+    <string name="success">success</string>
+    <string name="timeout_freeze">FreezeTimeout(s)</string>
+    <string name="timeout_wakeup">timeout wakeup</string>
+    <string name="timeout_terminate">timeout terminate</string>
+    <string name="freeze_mode">freeze mode</string>
+    <string name="save">save</string>
+</resources>

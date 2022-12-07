@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="bind_core_entries">
+        <item>[0][1][2][3][_][_][_][_]</item>
+        <item>[0][1][2][_][_][_][_][_]</item>
+        <item>[_][_][_][3][4][_][_][_]</item>
+        <item>[_][_][_][_][4][5][6][_]</item>
+        <item>[_][_][_][_][_][5][6][_]</item>
+        <item>[_][_][_][_][_][_][_][7]</item>
+        <item>[_][_][_][_][4][5][6][7]</item>
+    </string-array>
+    <string-array name="bind_core_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="freeze_mode_entries">
+        <item>全局SIGSTOP</item>
+        <item>FreezerV1(uid)</item>
+        <item>FreezerV1(frozen)</item>
+        <item>FreezerV2(uid)</item>
+        <item>FreezerV2(frozen)</item>
+        <item>自动选择</item>
+    </string-array>
+    <string-array name="freeze_mode_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <string-array name="level_entries">
+        <item>😡严格</item>
+        <item>😐宽松</item>
+    </string-array>
+
+    <string-array name="config_entries">
+        <item>杀死后台</item>
+        <item>SIGSTOP冻结</item>
+        <item>Freezer冻结</item>
+        <item>自由后台</item>
+    </string-array>
+</resources>

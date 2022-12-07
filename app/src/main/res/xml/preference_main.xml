@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <DropDownPreference
+        app:defaultValue="0"
+        app:entries="@array/bind_core_entries"
+        app:entryValues="@array/bind_core_values"
+        app:iconSpaceReserved="false"
+        app:key="bind_core"
+        app:title="@string/bind_core_title"
+        app:useSimpleSummaryProvider="true" />
+    <SeekBarPreference
+        android:max="60"
+        app:defaultValue="15"
+        app:iconSpaceReserved="false"
+        app:key="timeout_freeze"
+        app:min="1"
+        app:showSeekBarValue="true"
+        app:title="@string/timeout_freeze" />
+    <SeekBarPreference
+        android:max="120"
+        app:defaultValue="15"
+        app:iconSpaceReserved="false"
+        app:key="timeout_wakeup"
+        app:min="3"
+        app:showSeekBarValue="true"
+        app:title="@string/timeout_wakeup" />
+    <SeekBarPreference
+        android:max="120"
+        app:defaultValue="15"
+        app:iconSpaceReserved="false"
+        app:key="timeout_terminate"
+        app:min="3"
+        app:showSeekBarValue="true"
+        app:title="@string/timeout_terminate" />
+    <DropDownPreference
+        app:defaultValue="5"
+        app:entries="@array/freeze_mode_entries"
+        app:entryValues="@array/freeze_mode_values"
+        app:iconSpaceReserved="false"
+        app:key="freeze_mode"
+        app:title="@string/freeze_mode"
+        app:useSimpleSummaryProvider="true" />
+    <SwitchPreferenceCompat
+        app:iconSpaceReserved="false"
+        app:key="foreground"
+        app:summary="略微省电的任务切换识别，Android12+建议开启，但方式激进，小概率导致冻结/解冻失效。重启生效"
+        app:title="激进识别" />
+    <SwitchPreferenceCompat
+        app:iconSpaceReserved="false"
+        app:key="battery"
+        app:summary="记录电池充/放电时长、功率、温度等"
+        app:title="电池监控" />
+    <SwitchPreferenceCompat
+        app:iconSpaceReserved="false"
+        app:key="current"
+        app:summary="电流或功率数值接近或等于0则需要开启，例如ColorOS"
+        app:title="电流校准" />
+    <SwitchPreferenceCompat
+        app:iconSpaceReserved="false"
+        app:key="kill_msf"
+        app:summary="冻结QQ/TIM时，是否需要杀死MSF进程，杀死后可由HMSPush或MiPush接管消息推送"
+        app:title="杀死MSF" />
+    <SwitchPreferenceCompat
+        app:iconSpaceReserved="false"
+        app:key="lmk"
+        app:summary="调整安卓11-15的lmk参数，缓解lmkd杀后台，重启生效"
+        app:title="调整lmk参数" />
+    <SwitchPreferenceCompat
+        app:iconSpaceReserved="false"
+        app:key="doze"
+        app:summary="息屏状态超时3分钟后，尝试强制进入深度Doze(低功耗待机模式)，充电状态除外。部分系统有可能会早于冻它控制而提前进入Doze。"
+        app:title="息屏Doze" />
+</PreferenceScreen>
