@@ -37,6 +37,7 @@ import io.github.duzhaokun123.yafm.R
 import io.github.duzhaokun123.yafm.databinding.FragmentConfigBinding
 import io.github.duzhaokun123.yafm.databinding.ItemAppBinding
 import io.github.duzhaokun123.yafm.ui.base.BaseSimpleAdapter
+import io.github.duzhaokun123.yafm.utils.Cache
 import io.github.duzhaokun123.yafm.utils.Freezeit
 import java.nio.charset.StandardCharsets
 import java.util.Locale
@@ -316,8 +317,12 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
         override fun initData(baseBinding: ItemAppBinding, position: Int) {
             val list = applicationListFilter ?: applicationInfoListSort
             list[position].let { applicationInfo ->
-                baseBinding.ivIcon.setImageDrawable(applicationInfo.loadIcon(pm))
-                baseBinding.tvLabel.text = applicationInfo.loadLabel(pm)
+//                baseBinding.ivIcon.setImageDrawable(applicationInfo.loadIcon(pm))
+//                baseBinding.tvLabel.text = applicationInfo.loadLabel(pm)
+                Cache.getIconLabel(applicationInfo).let { (icon, label) ->
+                    baseBinding.ivIcon.setImageDrawable(icon)
+                    baseBinding.tvLabel.text = label
+                }
                 baseBinding.tvPackage.text = applicationInfo.packageName
                 val config = appCfg[applicationInfo.uid] ?: return
                 val (m, l) = config

@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">YAFM</string>
+    <string name="details">详情</string>
+    <string name="unknown_error">未知错误</string>
+    <string name="title_home">主页</string>
+    <string name="title_config">配置</string>
+    <string name="title_log">日志</string>
+    <string name="update_app_name">更新应用名</string>
+    <string name="help">帮助</string>
+    <string name="clear_log_text">清空日志</string>
+    <string name="check_freezer">检查冻结</string>
+    <string name="update_start">更新应用名中</string>
+    <string name="freezeit_offline">冻它未安装或允行</string>
+    <string name="update_success">更新成功</string>
+    <string name="update_fail">更新失败</string>
+    <string name="title_activity_setting">设置</string>
+    <string name="about">关于</string>
+    <string name="magisk_online">Magisk 已激活</string>
+    <string name="install">安装</string>
+    <string name="need_update">需要更新 %s</string>
+    <string name="loading">加载中…</string>
+    <string name="realtime_text">CPU:%2d%%  %.1f℃</string>
+    <string name="system_info">系统信息</string>
+    <string name="bind_core_title">绑定核心</string>
+    <string name="slowly_tips">不要操作太快</string>
+    <string name="success">成功</string>
+    <string name="timeout_freeze">超时冻结(s)</string>
+    <string name="timeout_wakeup">定时解冻</string>
+    <string name="timeout_terminate">超时杀死</string>
+    <string name="freeze_mode">冻结模式</string>
+    <string name="save">保存</string>
+</resources>

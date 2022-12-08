@@ -25,8 +25,8 @@
     <string name="slowly_tips">Don\'t operate too quickly</string>
     <string name="success">success</string>
     <string name="timeout_freeze">FreezeTimeout(s)</string>
-    <string name="timeout_wakeup">timeout wakeup</string>
-    <string name="timeout_terminate">timeout terminate</string>
+    <string name="timeout_wakeup">timeout wakeup(min)</string>
+    <string name="timeout_terminate">timeout terminate(s)</string>
     <string name="freeze_mode">freeze mode</string>
     <string name="save">save</string>
 </resources>
