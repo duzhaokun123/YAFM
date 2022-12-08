@@ -49,7 +49,6 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
     }
 
     private var adapter: Adapter? = null
-    lateinit var pm: PackageManager
     private var lastTimestamp = System.currentTimeMillis()
     var searchView: SearchView? = null
 
@@ -138,7 +137,11 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
             if (appInfo.uid < 10000) continue
             if (appInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) continue
             applicationInfoList.add(appInfo)
+            runIO {
+                Cache.getIconLabel(appInfo)
+            }
         }
+        baseBinding.pv.visibility = View.VISIBLE
         runIO { Freezeit.freezeitTask(Freezeit.getAppCfg, null, getAppCfgHandler) }
     }
 
@@ -222,6 +225,7 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
             baseBinding.rv.adapter = adapter
             baseBinding.srl.isRefreshing = false
             adapter!!.notifyItemRangeChanged(0, applicationInfoListSort.size - 1)
+            baseBinding.pv.visibility = View.GONE
         }
     }
 
@@ -243,7 +247,6 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
 
     class Adapter(context: Context, private val applicationInfoListSort: MutableList<ApplicationInfo>, private val appCfg: HashMap<Int, Pair<Int, Int>>) :
         BaseSimpleAdapter<ItemAppBinding>(context, R.layout.item_app) {
-        private val pm = context.packageManager
         private var applicationListFilter: MutableList<ApplicationInfo>? = null
 
         fun getCfgBytes(): ByteArray {
@@ -256,20 +259,17 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
 
         @SuppressLint("NotifyDataSetChanged")
         fun filter(keyWord: String?) {
-            var keyWord = keyWord
             if (keyWord.isNullOrEmpty()) {
                 applicationListFilter = applicationInfoListSort
             } else {
-                keyWord = keyWord.lowercase(Locale.getDefault())
-                applicationListFilter = java.util.ArrayList<ApplicationInfo>()
+                applicationListFilter = mutableListOf()
                 for (appInfo in applicationInfoListSort) {
-                    if (appInfo.packageName.lowercase(Locale.getDefault()).contains(keyWord)) {
+                    if (appInfo.packageName.contains(keyWord, true)) {
                         applicationListFilter!!.add(appInfo)
                         continue
                     }
-                    val label =
-                        pm.getApplicationLabel(appInfo).toString().lowercase(Locale.getDefault())
-                    if (label.contains(keyWord)) {
+                    val label = Cache.getIconLabel(appInfo).second
+                    if (label.contains(keyWord, true)) {
                         applicationListFilter!!.add(appInfo)
                     }
                 }

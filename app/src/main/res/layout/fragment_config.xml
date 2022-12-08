@@ -26,5 +26,11 @@
             android:layout_margin="16dp"
             android:contentDescription="@string/save"
             android:src="@drawable/ic_save" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/pv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
     </RelativeLayout>
 </layout>
