@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -25,6 +26,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.duzhaokun123.androidapptemplate.bases.BaseFragment
 import io.github.duzhaokun123.androidapptemplate.utils.getAttr
 import io.github.duzhaokun123.androidapptemplate.utils.runIO
+import io.github.duzhaokun123.androidapptemplate.utils.runMain
 import io.github.duzhaokun123.yafm.R
 import io.github.duzhaokun123.yafm.databinding.FragmentHomeBinding
 import io.github.duzhaokun123.yafm.ui.settings.SettingsActivity
@@ -183,10 +185,17 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
                 return
             }
             if (viewHeight == 0 || viewWidth == 0) return
-            val bitmap = Bitmap.createBitmap(viewWidth / 3, viewHeight / 3, Bitmap.Config.ARGB_8888)
-            val buffer = ByteBuffer.wrap(response)
-            bitmap.copyPixelsFromBuffer(buffer)
-            baseBinding.cpuImg.setImageBitmap(bitmap)
+            runIO {
+                var bitmap = Bitmap.createBitmap(viewWidth / 3, viewHeight / 3, Bitmap.Config.ARGB_8888)
+                val buffer = ByteBuffer.wrap(response)
+                bitmap.copyPixelsFromBuffer(buffer)
+                val matrix = Matrix()
+                matrix.postScale(3F, 3F)
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, viewWidth / 3, viewHeight / 3, matrix, false)
+                runMain {
+                    baseBinding.cpuImg.setImageBitmap(bitmap)
+                }
+            }
             val offset: Int = viewWidth / 3 * (viewHeight / 3) * 4
             if (response.size - offset <= 0) {
                 val errorTips = "handleMessage: viewWidth" + viewWidth + " viewHeight" +
@@ -246,9 +255,7 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
                 mA = realTimeInfo[22].toInt()
                 mA = if (mA == 0) 0 else mA / -1000
             } catch (e: Exception) {
-                Log.e(
-                    TAG,
-                    "fail percent:[" + realTimeInfo[20] + "] temperature[" + realTimeInfo[21] + "] mA[" + realTimeInfo[22] + "]")
+                Log.e(TAG, "fail percent:[" + realTimeInfo[20] + "] temperature[" + realTimeInfo[21] + "] mA[" + realTimeInfo[22] + "]")
             }
             baseBinding.cpu.text =
                 String.format(getString(R.string.realtime_text), percent, temperature / 1000.0)
