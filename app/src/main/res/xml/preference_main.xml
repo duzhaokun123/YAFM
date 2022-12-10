@@ -7,8 +7,8 @@
         app:entryValues="@array/bind_core_values"
         app:iconSpaceReserved="false"
         app:key="bind_core"
-        app:title="@string/bind_core_title"
-        app:useSimpleSummaryProvider="true" />
+        app:summary="绑定冻它进程到某簇核心,小核省电,中大核解冻快,重启生效\n4+4架构：小核[0-3]，大核[4-7]，少数会反过来\n4+3+1架构：小核[0-3]，中核[4-6]，大核[7]\n3+2+2+1架构:小核[0-2]，中核[3-4]， 大核[5-6]，超大核[7]\n当前: %s"
+        app:title="@string/bind_core_title" />
     <SeekBarPreference
         android:max="60"
         app:defaultValue="15"
@@ -16,6 +16,7 @@
         app:key="timeout_freeze"
         app:min="1"
         app:showSeekBarValue="true"
+        app:summary="设为冻结的应用进入后台之后，需要多久冻结"
         app:title="@string/timeout_freeze" />
     <SeekBarPreference
         android:max="120"
@@ -24,6 +25,7 @@
         app:key="timeout_wakeup"
         app:min="3"
         app:showSeekBarValue="true"
+        app:summary="定时解冻被冻结的后台应用，解冻时长为[超时冻结]参数。若应用经常闪弹闪退，建议调短时间，不易冻死。设为最大值120则关闭定时解冻。如果使用FreezerV1存在内存泄漏，请不要关闭，否则无法释放内存。"
         app:title="@string/timeout_wakeup" />
     <SeekBarPreference
         android:max="120"
@@ -32,6 +34,7 @@
         app:key="timeout_terminate"
         app:min="3"
         app:showSeekBarValue="true"
+        app:summary="设为[杀死后台]的应用进入后台之后，需要多久杀死"
         app:title="@string/timeout_terminate" />
     <DropDownPreference
         app:defaultValue="5"
@@ -39,8 +42,8 @@
         app:entryValues="@array/freeze_mode_values"
         app:iconSpaceReserved="false"
         app:key="freeze_mode"
-        app:title="@string/freeze_mode"
-        app:useSimpleSummaryProvider="true" />
+        app:summary="选定[SIGSTOP模式]会使全局Freezer策略改为[SIGSTOP]。选定[Freezer模式]则为对应的Freezer策略。重启生效\n当前: %s"
+        app:title="@string/freeze_mode" />
     <SwitchPreferenceCompat
         app:iconSpaceReserved="false"
         app:key="foreground"
@@ -71,4 +74,8 @@
         app:key="doze"
         app:summary="息屏状态超时3分钟后，尝试强制进入深度Doze(低功耗待机模式)，充电状态除外。部分系统有可能会早于冻它控制而提前进入Doze。"
         app:title="息屏Doze" />
+    <Preference
+        app:iconSpaceReserved="false"
+        app:key="system_info"
+        app:title="@string/system_info" />
 </PreferenceScreen>

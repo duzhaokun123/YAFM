@@ -102,12 +102,12 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
             }
 
             // info [0]:moduleID [1]:moduleName [2]:moduleVersion [3]:moduleVersionCode [4]:moduleAuthor
-            //      [5]:xxx xxx xxx xxx (全部内存 可用内存 全部虚拟内存 可用虚拟内存: bytes)
+            //      [5]:clusterType: 3: 4+3+1 4:3+2+2+1
             val info = String(response, StandardCharsets.UTF_8).split("\n".toRegex())
                 .dropLastWhile { it.isEmpty() }
                 .toTypedArray()
 
-            if (info.size < 5 || info[0] != "freezeit") {
+            if (info.size < 6 || info[0] != "freezeit") {
                 setStatusError()
                 return
             }
@@ -116,6 +116,35 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
 
             baseBinding.tvMagisk.setText(R.string.magisk_online)
             baseBinding.tvVersion.text = "${info[2]} ($moduleVersionCode)"
+            val clusterType = info[5]
+            MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_small)).apply {
+                baseBinding.cpu0.setTextColor(this)
+                baseBinding.cpu1.setTextColor(this)
+                baseBinding.cpu2.setTextColor(this)
+                if (clusterType == "3") {
+                    baseBinding.cpu3.setTextColor(this)
+                }
+            }
+            MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_mid)).apply {
+                if (clusterType == "4") {
+                    baseBinding.cpu3.setTextColor(this)
+                }
+                baseBinding.cpu4.setTextColor(this)
+                if (clusterType == "3") {
+                    baseBinding.cpu5.setTextColor(this)
+                    baseBinding.cpu6.setTextColor(this)
+                }
+            }
+            MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_mid_plus)).apply {
+                if (clusterType == "4") {
+                    baseBinding.cpu5.setTextColor(this)
+                    baseBinding.cpu6.setTextColor(this)
+                }
+            }
+            MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_big)).apply {
+                baseBinding.cpu7.setTextColor(this)
+            }
+
 
             runIO { Http.getData("https://raw.fastgit.org/jark006/freezeitRelease/master/update.json", checkUpdateHandler) }
         }
@@ -282,20 +311,6 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
                 Thread(realTimeTask).start()
             }
         })
-        MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_small)).apply {
-            baseBinding.cpu0.setTextColor(this)
-            baseBinding.cpu1.setTextColor(this)
-            baseBinding.cpu2.setTextColor(this)
-            baseBinding.cpu3.setTextColor(this)
-        }
-        MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_mid)).apply {
-            baseBinding.cpu4.setTextColor(this)
-            baseBinding.cpu5.setTextColor(this)
-            baseBinding.cpu6.setTextColor(this)
-        }
-        MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_big)).apply {
-            baseBinding.cpu7.setTextColor(this)
-        }
     }
 
     override fun initData() {
