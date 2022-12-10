@@ -40,7 +40,6 @@ import io.github.duzhaokun123.yafm.ui.base.BaseSimpleAdapter
 import io.github.duzhaokun123.yafm.utils.Cache
 import io.github.duzhaokun123.yafm.utils.Freezeit
 import java.nio.charset.StandardCharsets
-import java.util.Locale
 import java.util.function.Consumer
 
 class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_config), MenuProvider {
@@ -301,12 +300,7 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
             }
             baseBinding.spLevel.onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                    val l = when(position) {
-                        0 -> 1
-                        1 -> 0
-                        else -> throw RuntimeException("unknown position $position")
-                    }
-                    appCfg[uid] = appCfg[uid]?.let { Pair(it.first, l) } ?: return
+                    appCfg[uid] = appCfg[uid]?.let { Pair(it.first, position) } ?: return
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -338,8 +332,7 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
                     baseBinding.spConfig.setSelection(mi)
                     if (mi == 2) {
                         baseBinding.spLevel.visibility = View.VISIBLE
-                        val li = if (l != 0) 0 else 1
-                        baseBinding.spLevel.setSelection(li)
+                        baseBinding.spLevel.setSelection(l)
                     } else {
                         baseBinding.spLevel.visibility = View.GONE
                     }
