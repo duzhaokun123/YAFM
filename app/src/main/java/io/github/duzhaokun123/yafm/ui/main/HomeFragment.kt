@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.view.MenuProvider
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -102,7 +103,7 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
             }
 
             // info [0]:moduleID [1]:moduleName [2]:moduleVersion [3]:moduleVersionCode [4]:moduleAuthor
-            //      [5]:clusterType: 3: 4+3+1 4:3+2+2+1
+            //      [5]:clusterType: 2: 4+4 3: 4+3+1 4:3+2+2+1
             val info = String(response, StandardCharsets.UTF_8).split("\n".toRegex())
                 .dropLastWhile { it.isEmpty() }
                 .toTypedArray()
@@ -117,11 +118,12 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
             baseBinding.tvMagisk.setText(R.string.magisk_online)
             baseBinding.tvVersion.text = "${info[2]} ($moduleVersionCode)"
             val clusterType = info[5]
+            Toast.makeText(requireContext(), clusterType, Toast.LENGTH_LONG).show()
             MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_small)).apply {
                 baseBinding.cpu0.setTextColor(this)
                 baseBinding.cpu1.setTextColor(this)
                 baseBinding.cpu2.setTextColor(this)
-                if (clusterType == "3") {
+                if (clusterType == "3" || clusterType == "2") {
                     baseBinding.cpu3.setTextColor(this)
                 }
             }
@@ -142,9 +144,13 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
                 }
             }
             MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_big)).apply {
+                if (clusterType == "2") {
+                    baseBinding.cpu4.setTextColor(this)
+                    baseBinding.cpu5.setTextColor(this)
+                    baseBinding.cpu6.setTextColor(this)
+                }
                 baseBinding.cpu7.setTextColor(this)
             }
-
 
             runIO { Http.getData("https://raw.fastgit.org/jark006/freezeitRelease/master/update.json", checkUpdateHandler) }
         }
