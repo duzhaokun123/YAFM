@@ -118,7 +118,6 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
             baseBinding.tvMagisk.setText(R.string.magisk_online)
             baseBinding.tvVersion.text = "${info[2]} ($moduleVersionCode)"
             val clusterType = info[5]
-            Toast.makeText(requireContext(), clusterType, Toast.LENGTH_LONG).show()
             MaterialColors.harmonizeWithPrimary(requireContext(), requireContext().getColor(R.color.cpu_small)).apply {
                 baseBinding.cpu0.setTextColor(this)
                 baseBinding.cpu1.setTextColor(this)

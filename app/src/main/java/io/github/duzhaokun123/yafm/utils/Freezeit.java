@@ -47,38 +47,35 @@ public class Freezeit {
     public final static byte rebootEdl = 84;
 
     public static synchronized void freezeitTask(byte command, byte[] AdditionalData, Handler handler) {
-        final String hostname = "127.0.0.1";
-        final int port = 60613;
-
-        // 前4字节代表附带数据大小(unsigned int32 大端),最后一个字节是附带数据的异或校验值
-        // 第五位字节：2:获取模块信息, 3:获取更新日志, 4:获取运行日志, 5:获取白名单.  其他命令参考上面
+        // dataHeader[0-3]:附带数据大小(uint32 小端)
+        // dataHeader[4]: 命令(可参考上面)
+        // dataHeader[5]: 附带数据的异或校验值
         byte[] dataHeader = {0, 0, 0, 0, command, 0};
         byte[] responseBuf = null;
         try {
             Socket socket = new Socket();
-            socket.connect(new InetSocketAddress(hostname, port), 3000);
+            socket.connect(new InetSocketAddress("127.0.0.1", 60613), 3000);
+
+            // 终端执行 setenforce 0 ，即设置 SELinux 为宽容模式, 普通安卓应用才可以使用 LocalSocket
+            // var socket = new LocalSocket();
+            // socket.connect(new LocalSocketAddress("FreezeitServer", LocalSocketAddress.Namespace.ABSTRACT));
+
             InputStream is = socket.getInputStream();
             OutputStream os = socket.getOutputStream();
 
-            int sendLen = 0;
             if (AdditionalData != null && AdditionalData.length > 0) {
                 byte XOR = 0;
-                for (byte b : AdditionalData) {
+                for (byte b : AdditionalData)
                     XOR ^= b;
-                }
+
+                Int2Byte(AdditionalData.length, dataHeader, 0);
                 dataHeader[5] = XOR;
 
-                sendLen = AdditionalData.length;
-                for (int i = 3; i >= 0; i--) {
-                    dataHeader[i] = (byte) (sendLen & 0xff);
-                    sendLen >>= 8;
-                }
-            }
-
-            os.write(dataHeader);
-
-            if (AdditionalData != null && AdditionalData.length > 0)
+                os.write(dataHeader);
                 os.write(AdditionalData);
+            } else {
+                os.write(dataHeader);
+            }
 
             os.flush();
 
@@ -86,42 +83,62 @@ public class Freezeit {
                 int receiveLen = is.read(dataHeader, 0, 6);
                 if (receiveLen != 6) {
                     Log.e(TAG, "Receive dataHeader Fail, receiveLen:" + receiveLen);
+                    socket.close();
                     return;
                 }
 
-                int requireLen = (Byte.toUnsignedInt(dataHeader[0]) << 24) |
-                        (Byte.toUnsignedInt(dataHeader[1]) << 16) |
-                        (Byte.toUnsignedInt(dataHeader[2]) << 8) |
-                        (Byte.toUnsignedInt(dataHeader[3]));
+                int payloadLen = Byte2Int(dataHeader, 0);
 
-                responseBuf = new byte[requireLen];
+                responseBuf = new byte[payloadLen];
 
                 int readCnt = 0;
-                while (readCnt < requireLen) { //欲求不满
-                    int cnt = is.read(responseBuf, readCnt, requireLen - readCnt);
+                while (readCnt < payloadLen) { //欲求不满
+                    int cnt = is.read(responseBuf, readCnt, payloadLen - readCnt);
                     if (cnt < 0) {
-                        Log.e(TAG, "Get Content Fail");
+                        Log.e(TAG, "Get payload Fail");
+                        socket.close();
                         return;
                     }
                     readCnt += cnt;
                 }
             }
-
-            is.close();
-            os.close();
             socket.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if (handler == null)
-            return;
+        if (handler != null) {
+            Message msg = new Message();
+            Bundle data = new Bundle();
+            data.putByteArray("response", responseBuf);
+            msg.setData(data);
+            handler.sendMessage(msg);
+        }
+    }
 
-        Message msg = new Message();
-        Bundle data = new Bundle();
-        data.putByteArray("response", responseBuf);
-        msg.setData(data);
-        handler.sendMessage(msg);
+    // 小端 只是避免内存越界，不处理转换失败的情况
+    public static int Byte2Int(byte[] bytes, int byteOffset) {
+        if (bytes == null || (byteOffset + 4) > bytes.length)
+            return 0;
+
+        return Byte.toUnsignedInt(bytes[byteOffset]) |
+                (Byte.toUnsignedInt(bytes[byteOffset + 1]) << 8) |
+                (Byte.toUnsignedInt(bytes[byteOffset + 2]) << 16) |
+                (Byte.toUnsignedInt(bytes[byteOffset + 3]) << 24);
+    }
+
+    public static void Int2Byte(int value, byte[] bytes, int byteOffset) {
+        if (bytes == null) return;
+        if ((byteOffset + 4) > bytes.length) {
+            while (byteOffset < bytes.length)
+                bytes[byteOffset++] = 0;
+            return;
+        }
+
+        bytes[byteOffset++] = (byte) value;
+        bytes[byteOffset++] = (byte) (value >> 8);
+        bytes[byteOffset++] = (byte) (value >> 16);
+        bytes[byteOffset] = (byte) (value >> 24);
     }
 }

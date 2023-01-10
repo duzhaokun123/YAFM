@@ -289,7 +289,7 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
                         else -> throw RuntimeException("unknown position $position")
                     }
                     appCfg[uid] = appCfg[uid]?.let { Pair(m, it.second) } ?: return
-                    if (m == 30) {
+                    if (m != 40) {
                         baseBinding.spLevel.visibility = View.VISIBLE
                     } else {
                         baseBinding.spLevel.visibility = View.GONE
