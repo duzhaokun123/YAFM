@@ -53,7 +53,7 @@ public class Freezeit {
         byte[] dataHeader = {0, 0, 0, 0, command, 0};
         byte[] responseBuf = null;
         try {
-            Socket socket = new Socket();
+            var socket = new Socket();
             socket.connect(new InetSocketAddress("127.0.0.1", 60613), 3000);
 
             // 终端执行 setenforce 0 ，即设置 SELinux 为宽容模式, 普通安卓应用才可以使用 LocalSocket

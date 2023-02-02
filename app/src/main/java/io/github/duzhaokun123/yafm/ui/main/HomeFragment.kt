@@ -20,7 +20,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.core.view.MenuProvider
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -41,6 +40,7 @@ import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.abs
 import kotlin.math.pow
+
 
 class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), MenuProvider {
     companion object {
@@ -201,12 +201,11 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
     var availMem: Long = 0
 
     var realTimeTask = Runnable {
-        am.getMemoryInfo(memoryInfo)
-        availMem = memoryInfo.availMem
-        Freezeit.freezeitTask(
-            Freezeit.getRealTimeInfo,
-            ("" + viewHeight / 3 + " " + viewWidth / 3 + " " + availMem).toByteArray(),
-            realTimeHandler)
+        val payload = ByteArray(8)
+        Freezeit.Int2Byte(viewHeight / 3, payload, 0)
+        Freezeit.Int2Byte(viewWidth / 3, payload, 4)
+
+        Freezeit.freezeitTask(Freezeit.getRealTimeInfo, payload, realTimeHandler)
     }
 
     private val realTimeHandler: Handler = object : Handler(Looper.getMainLooper()) {
