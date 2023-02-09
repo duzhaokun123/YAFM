@@ -5,7 +5,6 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -20,13 +19,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.view.MenuProvider
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.duzhaokun123.androidapptemplate.bases.BaseFragment
 import io.github.duzhaokun123.androidapptemplate.utils.getAttr
 import io.github.duzhaokun123.androidapptemplate.utils.runIO
-import io.github.duzhaokun123.androidapptemplate.utils.runMain
 import io.github.duzhaokun123.yafm.R
 import io.github.duzhaokun123.yafm.databinding.FragmentHomeBinding
 import io.github.duzhaokun123.yafm.ui.settings.SettingsActivity
@@ -39,7 +38,6 @@ import java.nio.charset.StandardCharsets
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.abs
-import kotlin.math.pow
 
 
 class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), MenuProvider {
@@ -201,9 +199,12 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
     var availMem: Long = 0
 
     var realTimeTask = Runnable {
-        val payload = ByteArray(8)
+        val payload = ByteArray(12)
         Freezeit.Int2Byte(viewHeight / 3, payload, 0)
         Freezeit.Int2Byte(viewWidth / 3, payload, 4)
+
+        am.getMemoryInfo(memoryInfo) // 底层 /proc/meminfo 的 MemAvailable 不可靠
+        Freezeit.Int2Byte((memoryInfo.availMem shr 20).toInt(), payload, 8) //Unit: MiB
 
         Freezeit.freezeitTask(Freezeit.getRealTimeInfo, payload, realTimeHandler)
     }
@@ -213,86 +214,74 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
             val response = msg.data.getByteArray("response")
-            if (response == null || response.isEmpty()) {
-                baseBinding.memLayout.visibility = View.GONE
-                return
-            }
-            if (viewHeight == 0 || viewWidth == 0) return
-            runIO {
-                var bitmap = Bitmap.createBitmap(viewWidth / 3, viewHeight / 3, Bitmap.Config.ARGB_8888)
-                val buffer = ByteBuffer.wrap(response)
-                bitmap.copyPixelsFromBuffer(buffer)
-                val matrix = Matrix()
-                matrix.postScale(3F, 3F)
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, viewWidth / 3, viewHeight / 3, matrix, false)
-                runMain {
-                    baseBinding.cpuImg.setImageBitmap(bitmap)
-                }
-            }
-            val offset: Int = viewWidth / 3 * (viewHeight / 3) * 4
-            if (response.size - offset <= 0) {
-                val errorTips = "handleMessage: viewWidth" + viewWidth + " viewHeight" +
-                        viewHeight + " response.length" + response.size + " offset" + offset
-                Log.e(TAG, errorTips)
+
+            val height = viewHeight / 3
+            val width = viewWidth / 3
+
+            if (response == null || response.isEmpty() || viewHeight == 0 || viewWidth == 0) return
+
+            // response[0 ~ imgBuffBytes-1]CPU曲线图像数据, [imgBuffBytes ~ end]是其他实时数据
+            val imgBuffBytes: Int = height * width * 4 // ARGB 每像素4字节
+            if (response.size <= imgBuffBytes) {
+                Toast.makeText(requireContext(), String(response), Toast.LENGTH_LONG).show()
+                val errorTips = "imgWidth" + width +
+                        " imgHeight" + height +
+                        " response.length" + response.size +
+                        " imgBuffBytes" + imgBuffBytes
                 baseBinding.memInfo.text = errorTips
                 return
             }
-            val tmpBytes = ByteArray(response.size - offset)
-            System.arraycopy(response, offset, tmpBytes, 0, response.size - offset)
-            val tmpStr = String(tmpBytes, StandardCharsets.UTF_8)
-            val realTimeInfo = tmpStr.split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-                .toTypedArray()
 
-            // [0/1/2/3]内存情况 [4-11]八个核心频率 [12-19]八个核心使用率
-            // [20]CPU总使用率 [21]CPU温度(需除以1000) [22]电流(mA)
-            if (realTimeInfo.size < 23) {
-                val tmp = StringBuilder("handleMessage: memSplit.length" + realTimeInfo.size)
-                for (i in realTimeInfo.indices) tmp.append(" [").append(i).append("]").append(
-                    realTimeInfo[i])
-                Log.e(TAG, tmp.toString())
-                baseBinding.memInfo.text = tmp
+            var bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(response, 0, imgBuffBytes))
+            bitmap = Freezeit.resize(bitmap, 3F, 3F)
+            baseBinding.cpuImg.setImageBitmap(bitmap)
+
+            val elementNum = 23
+            val realTimeInfoLen: Int = response.size - imgBuffBytes
+            if (realTimeInfoLen != 4 * elementNum) {
+                baseBinding.memInfo.text = "正常字节长度:" + 4 * elementNum + " 收到长度:" + realTimeInfoLen
                 return
             }
-            val memList = LongArray(4)
-            try {
-                for (i in 0..3) memList[i] = realTimeInfo[i].toLong()
-            } catch (e: Exception) {
-                Log.e(TAG, "handleMessage: memList long:$tmpStr\n$e")
-                baseBinding.cpu.text = "tmpStr$tmpStr"
-                return
-            }
-            @SuppressLint("DefaultLocale") var tmp: String = String.format(
-                "[物理内存] 全部: %.2f GiB\n已用:%.1f%% 剩余: %.2f %s",
-                memList[0] / 1024.0.pow(3.0), 100.0 * (memList[0] - availMem) / memList[0],
-                if (availMem > 1024.0.pow(3.0)) availMem / 1024.0.pow(3.0) else availMem / 1024.0.pow(2.0),
-                if (availMem > 1024.0.pow(3.0)) "GiB" else "MiB")
+
+            // [0]全部物理内存 [1]可用内存 [2]全部虚拟内存 [3]可用虚拟内存  Unit: MiB
+            // [4-11]八个核心频率(MHz) [12-19]八个核心使用率(%)
+            // [20]CPU总使用率(%) [21]CPU温度(m℃) [22]电流(mA)
+            val realTimeInfo = IntArray(elementNum) //ARM64和X64  Native层均为小端
+
+            Freezeit.Byte2Int(response, imgBuffBytes, elementNum * 4, realTimeInfo, 0)
+
+            val GiB = 1024.0
+            val MemTotal = realTimeInfo[0]
+            val MemAvailable = realTimeInfo[1]
+            val SwapTotal = realTimeInfo[2]
+            val SwapFree = realTimeInfo[3]
+
+            @SuppressLint("DefaultLocale")
+            var tmp = if (MemTotal <= 0) "" else String.format(
+                getString(R.string.physical_ram_text),
+                MemTotal / GiB, 100.0 * (MemTotal - MemAvailable) / MemTotal,
+                if (MemAvailable > GiB) MemAvailable / GiB else MemAvailable,
+                if (MemAvailable > GiB) "GiB" else "MiB"
+            )
             baseBinding.memInfo.text = tmp
-            if (memList[2] > 0) { //可能没有 虚拟内存
-                tmp = String.format(
-                    "[虚拟内存] 全部: %.2f GiB\n已用:%.1f%% 剩余: %.2f %s",
-                    memList[2] / 1024.0.pow(3.0),
-                    100.0 * (memList[2] - memList[3]) / memList[2],
-                    if (memList[3] > 1024.0.pow(3.0)) memList[3] / 1024.0.pow(3.0) else memList[3] / 1024.0.pow(2.0),
-                    if (memList[3] > 1024.0.pow(3.0)) "GiB" else "MiB")
-                baseBinding.zramInfo.text = tmp
-            }
 
-            // [4-11]八个核心频率 [12-19]八个核心使用率
-            // [20]CPU总使用率 [21]CPU温度(需除以1000) [22]电流(mA)
-            var percent = 0
-            var temperature = 0
-            var mA = 0
-            try {
-                percent = realTimeInfo[20].toInt()
-                temperature = realTimeInfo[21].toInt()
-                mA = realTimeInfo[22].toInt()
-                mA = if (mA == 0) 0 else mA / -1000
-            } catch (e: Exception) {
-                Log.e(TAG, "fail percent:[" + realTimeInfo[20] + "] temperature[" + realTimeInfo[21] + "] mA[" + realTimeInfo[22] + "]")
-            }
+            tmp = if (SwapTotal <= 0) "" else String.format(
+                getString(R.string.virtual_ram_text),
+                SwapTotal / GiB, 100.0 * (SwapTotal - SwapFree) / SwapTotal,
+                if (SwapFree > GiB) SwapFree / GiB else SwapFree,
+                if (SwapFree > GiB) "GiB" else "MiB"
+            )
+            baseBinding.zramInfo.text = tmp
+
+            val percent = realTimeInfo[20]
+            val temperature = realTimeInfo[21] / 1e3 // m℃ -> ℃
+
+            val mA = realTimeInfo[22] / -1000 // uA -> mA
+
             baseBinding.cpu.text =
-                String.format(getString(R.string.realtime_text), percent, temperature / 1000.0)
-            baseBinding.battery.text = if (abs(mA) > 2000) String.format("%.2f A", mA / 1e3) else "$mA mA"
+                String.format(getString(R.string.cpu_format), percent, temperature)
+            baseBinding.battery.text = if (abs(mA) > 2000) String.format("%.2f A\uD83D\uDD0B", mA / 1e3) else "$mA mA\uD83D\uDD0B"
             baseBinding.cpu0.text = "cpu0\n${realTimeInfo[4]}MHz\n${realTimeInfo[12]}%"
             baseBinding.cpu1.text = "cpu1\n${realTimeInfo[5]}MHz\n${realTimeInfo[13]}%"
             baseBinding.cpu2.text = "cpu2\n${realTimeInfo[6]}MHz\n${realTimeInfo[14]}%"

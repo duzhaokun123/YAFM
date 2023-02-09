@@ -29,4 +29,7 @@
     <string name="timeout_terminate">timeout terminate(s)</string>
     <string name="freeze_mode">freeze mode</string>
     <string name="save">save</string>
+    <string name="physical_ram_text">[PhysicalRAM] Total: %.2f GiB\nUse: %.1f%% Remain: %.2f %s</string>
+    <string name="virtual_ram_text">[VirtualRAM] Total: %.2f GiB\nUse: %.1f%% Remain: %.2f %s</string>
+    <string name="cpu_format" translatable="false">🎛️ %2d%% %.1f℃</string>
 </resources>

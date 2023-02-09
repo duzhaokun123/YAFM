@@ -29,4 +29,6 @@
     <string name="timeout_terminate">超时杀死</string>
     <string name="freeze_mode">冻结模式</string>
     <string name="save">保存</string>
+    <string name="physical_ram_text">[物理内存] 全部: %.2f GiB\n已用:%.1f%% 剩余: %.2f %s</string>
+    <string name="virtual_ram_text">[虚拟内存] 全部: %.2f GiB\n已用:%.1f%% 剩余: %.2f %s</string>
 </resources>

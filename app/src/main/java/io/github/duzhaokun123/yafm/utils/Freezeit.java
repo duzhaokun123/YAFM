@@ -1,5 +1,7 @@
 package io.github.duzhaokun123.yafm.utils;
 
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -128,6 +130,19 @@ public class Freezeit {
                 (Byte.toUnsignedInt(bytes[byteOffset + 3]) << 24);
     }
 
+    public static void Byte2Int(byte[] bytes, int byteOffset, int byteLength, int[] ints, int intOffset) {
+        if (ints == null || bytes == null || (intOffset + byteLength / 4) > ints.length ||
+                (byteOffset + byteLength) > bytes.length)
+            return;
+
+        for (int byteIdx = byteOffset; byteIdx < byteOffset + byteLength; byteIdx += 4) {
+            ints[intOffset++] = Byte.toUnsignedInt(bytes[byteIdx]) |
+                    (Byte.toUnsignedInt(bytes[byteIdx + 1]) << 8) |
+                    (Byte.toUnsignedInt(bytes[byteIdx + 2]) << 16) |
+                    (Byte.toUnsignedInt(bytes[byteIdx + 3]) << 24);
+        }
+    }
+
     public static void Int2Byte(int value, byte[] bytes, int byteOffset) {
         if (bytes == null) return;
         if ((byteOffset + 4) > bytes.length) {
@@ -140,5 +155,11 @@ public class Freezeit {
         bytes[byteOffset++] = (byte) (value >> 8);
         bytes[byteOffset++] = (byte) (value >> 16);
         bytes[byteOffset] = (byte) (value >> 24);
+    }
+
+    public static Bitmap resize(Bitmap bitmap, float scaleX, float scaleY) {
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleX, scaleY);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
     }
 }
