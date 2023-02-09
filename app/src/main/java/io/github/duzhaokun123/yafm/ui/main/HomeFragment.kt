@@ -261,7 +261,7 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
             var tmp = if (MemTotal <= 0) "" else String.format(
                 getString(R.string.physical_ram_text),
                 MemTotal / GiB, 100.0 * (MemTotal - MemAvailable) / MemTotal,
-                if (MemAvailable > GiB) MemAvailable / GiB else MemAvailable,
+                if (MemAvailable > GiB) MemAvailable / GiB else MemAvailable.toDouble(),
                 if (MemAvailable > GiB) "GiB" else "MiB"
             )
             baseBinding.memInfo.text = tmp
@@ -269,7 +269,7 @@ class HomeFragment: BaseFragment<FragmentHomeBinding>(R.layout.fragment_home), M
             tmp = if (SwapTotal <= 0) "" else String.format(
                 getString(R.string.virtual_ram_text),
                 SwapTotal / GiB, 100.0 * (SwapTotal - SwapFree) / SwapTotal,
-                if (SwapFree > GiB) SwapFree / GiB else SwapFree,
+                if (SwapFree > GiB) SwapFree / GiB else SwapFree.toDouble(),
                 if (SwapFree > GiB) "GiB" else "MiB"
             )
             baseBinding.zramInfo.text = tmp
