@@ -256,12 +256,20 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
         BaseSimpleAdapter<ItemAppBinding>(context, R.layout.item_app) {
         private var applicationListFilter: MutableList<ApplicationInfo>? = null
 
-        fun getCfgBytes(): ByteArray {
-            val tmp = StringBuilder()
-            appCfg.forEach { (key, value) ->
-                tmp.append(key).append(' ').append(value.first).append(' ').append(value.second).append('\n')
+        fun getCfgBytes(): ByteArray? {
+            if (appCfg.isEmpty()) return null
+
+            val tmp = ByteArray(appCfg.size * 12)
+            val idx = intArrayOf(0)
+            appCfg.forEach { (uid, cfg) ->
+                Freezeit.Int2Byte(uid, tmp, idx[0])
+                idx[0] += 4
+                Freezeit.Int2Byte(cfg.first, tmp, idx[0])
+                idx[0] += 4
+                Freezeit.Int2Byte(cfg.second, tmp, idx[0])
+                idx[0] += 4
             }
-            return  tmp.toString().toByteArray()
+            return tmp
         }
 
         @SuppressLint("NotifyDataSetChanged")
