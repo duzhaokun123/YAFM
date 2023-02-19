@@ -34,7 +34,6 @@ class SettingsFragment: PreferenceFragmentCompat() {
         const val WAKEUP_TIMEOUT = 3
         const val TERMINATE_TIMEOUT = 4
         const val MODE = 5
-        const val RADICA = 10
         const val BATTERY_MONITOR = 13
         const val BATTERY_FIX = 14
         const val KILL_MSF = 15
@@ -93,7 +92,6 @@ class SettingsFragment: PreferenceFragmentCompat() {
             putInt("timeout_wakeup", settingsVar[WAKEUP_TIMEOUT].toInt())
             putInt("timeout_terminate", settingsVar[TERMINATE_TIMEOUT].toInt())
             putString("freeze_mode", settingsVar[MODE].toString())
-            putBoolean("foreground", settingsVar[RADICA].toInt() != 0)
             putBoolean("battery", settingsVar[BATTERY_MONITOR].toInt() != 0)
             putBoolean("current", settingsVar[BATTERY_FIX].toInt() != 0)
             putBoolean("kill_msf", settingsVar[KILL_MSF].toInt() != 0)
@@ -156,17 +154,6 @@ class SettingsFragment: PreferenceFragmentCompat() {
             indexForHandler = MODE
             lastTimestamp = newTs
             runIO { Freezeit.freezeitTask(Freezeit.setSettingsVar, byteArrayOf(indexForHandler.toByte(), (newValue as String).toInt().toByte()), seekbarHandler) }
-            return@setOnPreferenceChangeListener true
-        }
-        findPreference<SwitchPreferenceCompat>("foreground")!!.setOnPreferenceChangeListener { _, newValue ->
-            val newTs = System.currentTimeMillis()
-            if (newTs - lastTimestamp < 1_000) {
-                TipUtil.showTip(context, R.string.slowly_tips)
-                return@setOnPreferenceChangeListener false
-            }
-            indexForHandler = RADICA
-            lastTimestamp = newTs
-            runIO { Freezeit.freezeitTask(Freezeit.setSettingsVar, byteArrayOf(indexForHandler.toByte(), if (newValue as Boolean) 1 else 0), seekbarHandler) }
             return@setOnPreferenceChangeListener true
         }
         findPreference<SwitchPreferenceCompat>("battery")!!.setOnPreferenceChangeListener { _, newValue ->

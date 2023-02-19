@@ -40,7 +40,7 @@ import io.github.duzhaokun123.yafm.ui.base.BaseSimpleAdapter
 import io.github.duzhaokun123.yafm.utils.Cache
 import io.github.duzhaokun123.yafm.utils.Freezeit
 import java.nio.charset.StandardCharsets
-import java.util.function.Consumer
+
 
 class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_config), MenuProvider {
     companion object {
@@ -155,71 +155,79 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
 
             // 配置名单 <uid, <cfg, isTolerant>>
             // cfg: [10]:杀死 [20]:SIGSTOP [30]:Freezer [40]:自由 [50]:内置
-            val appCfg = HashMap<Int, Pair<Int, Int>>()
-            val list = String(response, StandardCharsets.UTF_8).split("\n".toRegex())
-                .dropLastWhile { it.isEmpty() }
-                .toTypedArray()
-            for (item in list) {
-                val packageMode = item.split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-                    .toTypedArray()
-                if (packageMode.size != 3) {
-                    Log.e(TAG, "handleMessage: unknownItem:[$item]")
-                    continue
-                }
-                try {
-                    appCfg[packageMode[0].toInt()] =
-                        Pair(
-                            packageMode[1].toInt(), packageMode[2].toInt())
-                } catch (e: Exception) {
-                    Log.e(TAG, "handleMessage: unknownItem:[$item]")
-                }
+            val appCfg = mutableMapOf<Int, Pair<Int, Int>>()
+
+            var i = 0
+            while (i < response.size) {
+                val uid: Int = Freezeit.Byte2Int(response, i)
+                val freezeMode: Int = Freezeit.Byte2Int(response, i + 4)
+                val isTolerant: Int = Freezeit.Byte2Int(response, i + 8)
+                appCfg[uid] = Pair<Int, Int>(freezeMode, isTolerant)
+                i += 12
             }
 
             // 补全
-            applicationInfoList.forEach(
-                Consumer { info: ApplicationInfo ->
-                    if (!appCfg.containsKey(info.uid)) appCfg[info.uid] = Pair(Freezeit.CFG_FREEZER, 1) // 默认Freezer 宽松
-                })
+            applicationInfoList.forEach { application ->
+                if (!appCfg.containsKey(application.uid)) appCfg[application.uid] =
+                    Pair<Int, Int>(Freezeit.CFG_FREEZER, 1) // 默认Freezer 宽松
+            }
             // 检查非法配置
-            appCfg.forEach { (uid: Int, cfg: Pair<Int, Int>) ->
-                if (cfg.first < Freezeit.CFG_TERMINATE || cfg.first > Freezeit.CFG_WHITEFORCE) appCfg[uid] =
-                    Pair(Freezeit.CFG_FREEZER, cfg.second)
+            appCfg.forEach { (uid, cfg) ->
+                if (!Freezeit.CFG_SET.contains(cfg.first)
+                ) appCfg[uid] = Pair<Int, Int>(Freezeit.CFG_FREEZER, cfg.second)
             }
 
             // [10]:杀死后台 [20]:SIGSTOP [30]:Freezer [40]:自由 [50]:内置
             val applicationInfoListSort: MutableList<ApplicationInfo> = ArrayList()
 
             // 先排 自由
-            for (info in applicationInfoList) {
-                val mode = appCfg[info.uid]
-                if (mode != null && mode.first == Freezeit.CFG_WHITELIST) applicationInfoListSort.add(info)
+            for (application in applicationInfoList) {
+                val mode = appCfg[application.uid]
+                if (mode != null && mode.first == Freezeit.CFG_WHITELIST)
+                    applicationInfoListSort.add(application)
             }
 
-            // 再排序 宽松前台 的 FREEZER SIGSTOP 杀死后台
-            for (info in applicationInfoList) {
-                val mode = appCfg[info.uid]
-                if (mode != null && mode.first <= Freezeit.CFG_FREEZER && mode.second != 0) applicationInfoListSort.add(info)
+            // 优先排列：FREEZER SIGSTOP 杀死后台， 次排列：宽松 严格
+            for (application in applicationInfoList) {
+                val mode = appCfg[application.uid]
+                if (mode != null && mode.first == Freezeit.CFG_FREEZER && mode.second != 0)
+                    applicationInfoListSort.add(application)
+            }
+            for (application in applicationInfoList) {
+                val mode = appCfg[application.uid]
+                if (mode != null && mode.first == Freezeit.CFG_FREEZER && mode.second == 0)
+                    applicationInfoListSort.add(application)
             }
 
-            // 再排序 严格前台 的 FREEZER SIGSTOP 杀死后台
-            for (info in applicationInfoList) {
-                val mode = appCfg[info.uid]
-                if (mode != null && mode.first == Freezeit.CFG_FREEZER && mode.second == 0) applicationInfoListSort.add(info)
+            for (application in applicationInfoList) {
+                val mode = appCfg[application.uid]
+                if (mode != null && mode.first == Freezeit.CFG_SIGSTOP && mode.second != 0)
+                    applicationInfoListSort.add(application)
             }
-            for (info in applicationInfoList) {
-                val mode = appCfg[info.uid]
-                if (mode != null && mode.first == Freezeit.CFG_SIGSTOP && mode.second == 0) applicationInfoListSort.add(info)
+            for (application in applicationInfoList) {
+                val mode = appCfg[application.uid]
+                if (mode != null && mode.first == Freezeit.CFG_SIGSTOP && mode.second == 0)
+                    applicationInfoListSort.add(application)
             }
-            for (info in applicationInfoList) {
-                val mode = appCfg[info.uid]
-                if (mode != null && mode.first == Freezeit.CFG_TERMINATE && mode.second == 0) applicationInfoListSort.add(info)
+
+            for (application in applicationInfoList) {
+                val mode = appCfg[application.uid]
+                if (mode != null && mode.first == Freezeit.CFG_TERMINATE && mode.second != 0)
+                    applicationInfoListSort.add(application)
+            }
+            for (application in applicationInfoList) {
+                val mode = appCfg[application.uid]
+                if (mode != null && mode.first == Freezeit.CFG_TERMINATE && mode.second == 0)
+                    applicationInfoListSort.add(application)
             }
 
             // 最后排 内置自由
-            for (info in applicationInfoList) {
-                val mode = appCfg[info.uid]
-                if (mode != null && mode.first == Freezeit.CFG_WHITEFORCE) applicationInfoListSort.add(info)
+            for (application in applicationInfoList) {
+                val mode = appCfg[application.uid]
+                if (mode != null && mode.first == Freezeit.CFG_WHITEFORCE)
+                    applicationInfoListSort.add(application)
             }
+
             adapter = Adapter(requireContext(), applicationInfoListSort, appCfg)
             baseBinding.rv.adapter = adapter
             baseBinding.srl.isRefreshing = false
@@ -244,7 +252,7 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
         }
     }
 
-    class Adapter(context: Context, private val applicationInfoListSort: MutableList<ApplicationInfo>, private val appCfg: HashMap<Int, Pair<Int, Int>>) :
+    class Adapter(context: Context, private val applicationInfoListSort: MutableList<ApplicationInfo>, private val appCfg: MutableMap<Int, Pair<Int, Int>>) :
         BaseSimpleAdapter<ItemAppBinding>(context, R.layout.item_app) {
         private var applicationListFilter: MutableList<ApplicationInfo>? = null
 
@@ -311,8 +319,6 @@ class ConfigFragment : BaseFragment<FragmentConfigBinding>(R.layout.fragment_con
         override fun initData(baseBinding: ItemAppBinding, position: Int) {
             val list = applicationListFilter ?: applicationInfoListSort
             list[position].let { applicationInfo ->
-//                baseBinding.ivIcon.setImageDrawable(applicationInfo.loadIcon(pm))
-//                baseBinding.tvLabel.text = applicationInfo.loadLabel(pm)
                 Cache.getIconLabel(applicationInfo).let { (icon, label) ->
                     baseBinding.ivIcon.setImageDrawable(icon)
                     baseBinding.tvLabel.text = label

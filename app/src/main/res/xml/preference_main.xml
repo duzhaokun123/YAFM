@@ -46,11 +46,6 @@
         app:title="@string/freeze_mode" />
     <SwitchPreferenceCompat
         app:iconSpaceReserved="false"
-        app:key="foreground"
-        app:summary="略微省电的任务切换识别，Android12+建议开启，但方式激进，小概率导致冻结/解冻失效。重启生效"
-        app:title="激进识别" />
-    <SwitchPreferenceCompat
-        app:iconSpaceReserved="false"
         app:key="battery"
         app:summary="记录电池充/放电时长、功率、温度等"
         app:title="电池监控" />
